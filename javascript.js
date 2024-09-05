@@ -16,3 +16,17 @@ app.use(logReq);
 app.get("/", (req, res) => {
   res.send("Keeping it simple.");
 });
+
+// error handler
+app.use((err, req, res, next) => {
+    res.status(400).send(err.message);
+  });
+  
+  app.get("/", (req, res) => {
+    res.send("Keeping it simple.");
+  });
+  
+  app.listen(port, () => {
+    console.log(`Server listening on port: ${port}.`);
+  });
+  

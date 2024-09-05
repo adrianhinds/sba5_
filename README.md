@@ -1,1 +1,2 @@
 # sba5_
+This express server application was created using Node and Express. It also uses a Restful Api. This application uses Express middleware and it uses a temolate engine.The API interacts through html forms.
