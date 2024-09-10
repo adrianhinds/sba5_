@@ -1,142 +1,139 @@
-const express = require("express");
-const app = express();
-const port = 3000;
+const request = require('supertest');
+const app = require('../src/app');
 
+describe('Car API', () => {
+  it('should get all cars', async () => {
+    const response = await request(app).get('/cars');
+    expect(response.status).toBe(200);
+    expect(response.body).toBeInstanceOf(Array);
+    expect(response.body.length).toBeGreaterThanOrEqual(0);
+  });
 
-const nocache = (_, resp, next) => {
-  resp.header('Cache-Control', 'private, no-cache, no-store, must-revalidate');
-  resp.header('Expires', '-1');
-  resp.header('Pragma', 'no-cache');
-  next();
-}
+  it('should create a new car model', async () => {
+    const newCar = {
+      name: 'New Car',
+      model: 'Bmw',
+      series: '8'
+    };
 
-const ping = (req, resp) => {
-  resp.send({message: 'pong'});
-}
+    const response = await request(app)
+      .post('/cars')
+      .send(newCar);
 
-const generateRTCToken = (req, resp) => {
-  // set response header
-  resp.header('Access-Control-Allow-Origin', '*');
-  // get channel name
-  const channelName = req.params.channel;
-  if (!channelName) {
-    return resp.status(400).json({ 'error': 'channel is required' });
-  }
-  // get uid
-  let uid = req.params.uid;
-  if(!uid || uid === '') {
-    return resp.status(400).json({ 'error': 'uid is required' });
-  }
-  // get uid
-  let uid = req.params.uid;
-  if(!uid || uid === '') {
-    return resp.status(400).json({ 'error': 'uid is required' });
-  }
-  // get role
-  let role;
-  if (req.params.role === 'publisher') {
-    role = RtcRole.PUBLISHER;
-  } else if (req.params.role === 'audience') {
-    role = RtcRole.SUBSCRIBER
-  } else {
-    return resp.status(400).json({ 'error': 'role is incorrect' });
-  }
-  // get the expire time
-  let expireTime = req.query.expiry;
-  if (!expireTime || expireTime === '') {
-    expireTime = 3600;
-  } else {
-    expireTime = parseInt(expireTime, 10);
-  }
-  // calculate privilege expire time
-  const currentTime = Math.floor(Date.now() / 1000);
-  const privilegeExpireTime = currentTime + expireTime;  
-  // build the token
-  let token;
-  if (req.params.tokentype === 'userAccount') {
-    token = RtcTokenBuilder.buildTokenWithAccount(APP_ID, APP_CERTIFICATE, channelName, uid, role, privilegeExpireTime);
-  } else if (req.params.tokentype === 'uid') {
-    token = RtcTokenBuilder.buildTokenWithUid(APP_ID, APP_CERTIFICATE, channelName, uid, role, privilegeExpireTime);
-  } else {
-    return resp.status(400).json({ 'error': 'token type is invalid' });
-  }
-  // return the token
-  return resp.json({ 'rtcToken': token });
-}
+    expect(response.status).toBe(201);
+    expect(response.body).toHaveProperty('id');
+    expect(response.body.name).toBe(newAuthor.name);
+    expect(response.body.birthdate).toBe(newAuthor.birthdate);
+    expect(response.body.nationality).toBe(newAuthor.nationality);
+  });
 
-const generateRTMToken = (req, resp) => {
-  // set response header
-  resp.header('Access-Control-Allow-Origin', '*');
+  it('should get an author by ID', async () => {
+    const authorId = 1;
 
-  // get uid
-  let uid = req.params.uid;
-  if(!uid || uid === '') {
-    return resp.status(400).json({ 'error': 'uid is required' });
-  }
-  // get role
-  let role = RtmRole.Rtm_User;
-   // get the expire time
-  let expireTime = req.query.expiry;
-  if (!expireTime || expireTime === '') {
-    expireTime = 3600;
-  } else {
-    expireTime = parseInt(expireTime, 10);
-  }
-  // calculate privilege expire time
-  const currentTime = Math.floor(Date.now() / 1000);
-  const privilegeExpireTime = currentTime + expireTime;
-  // build the token
-  console.log(APP_ID, APP_CERTIFICATE, uid, role, privilegeExpireTime)
-  const token = RtmTokenBuilder.buildToken(APP_ID, APP_CERTIFICATE, uid, role, privilegeExpireTime);
-  // return the token
-  return resp.json({ 'rtmToken': token });
-}
+    const response = await request(app).get(`/authors/${authorId}`);
+    expect(response.status).toBe(200);
+    expect(response.body).toHaveProperty('id', authorId);
+    expect(response.body).toHaveProperty('name');
+    expect(response.body).toHaveProperty('birthdate');
+    expect(response.body).toHaveProperty('nationality');
+  });
 
-const generateRTEToken = (req, resp) => {
-  // set response header
-  resp.header('Access-Control-Allow-Origin', '*');
-  // get channel name
-  const channelName = req.params.channel;
-  if (!channelName) {
-    return resp.status(400).json({ 'error': 'channel is required' });
-  }
-  // get uid
-  let uid = req.params.uid;
-  if(!uid || uid === '') {
-    return resp.status(400).json({ 'error': 'uid is required' });
-  }
-  // get role
-  let role;
-  if (req.params.role === 'publisher') {
-    role = RtcRole.PUBLISHER;
-  } else if (req.params.role === 'audience') {
-    role = RtcRole.SUBSCRIBER
-  } else {
-    return resp.status(400).json({ 'error': 'role is incorrect' });
-  }
-  // get the expire time
-  let expireTime = req.query.expiry;
-  if (!expireTime || expireTime === '') {
-    expireTime = 3600;
-  } else {
-    expireTime = parseInt(expireTime, 10);
-  }
-  // calculate privilege expire time
-  const currentTime = Math.floor(Date.now() / 1000);
-  const privilegeExpireTime = currentTime + expireTime;
-  // build the token
-  const rtcToken = RtcTokenBuilder.buildTokenWithUid(APP_ID, APP_CERTIFICATE, channelName, uid, role, privilegeExpireTime);
-  const rtmToken = RtmTokenBuilder.buildToken(APP_ID, APP_CERTIICATE, uid, role, privilegeExpireTime);
-  // return the token
-  return resp.json({ 'rtcToken': rtcToken, 'rtmToken': rtmToken });
-}
+  it('should update an author by ID with the full object', async () => {
+    const updatedAuthor = {
+      id: 1,
+      name: 'Updated Author Name',
+      birthdate: '1980-01-01',
+      nationality: 'Updated Nationality'
+    };
 
-app.options('*', cors());
-app.get('/ping', nocache, ping)
-app.get('/rtc/:channel/:role/:tokentype/:uid', nocache , generateRTCToken);
-app.get('/rtm/:uid/', nocache , generateRTMToken);
-app.get('/rte/:channel/:role/:tokentype/:uid', nocache , generateRTEToken);
+    const response = await request(app)
+      .put(`/authors/${updatedAuthor.id}`)
+      .send(updatedAuthor);
 
-app.listen(PORT, () => {
-  console.log(`Listening on port: ${PORT}`);
+    expect(response.status).toBe(200);
+    expect(response.body).toMatchObject(updatedAuthor);
+  });
+
+  it('should partially update an author by ID', async () => {
+    const partialUpdate = {
+      name: 'Partially Updated Name'
+    };
+
+    const response = await request(app)
+      .patch('/authors/1')
+      .send(partialUpdate);
+
+    expect(response.status).toBe(200);
+    expect(response.body).toHaveProperty('id', 1);
+    expect(response.body.name).toBe(partialUpdate.name);
+  });
+
+  it('should delete an author by ID', async () => {
+    // First, create an author to delete
+    const newAuthor = {
+      name: 'Author to Delete',
+      birthdate: '1980-01-01',
+      nationality: 'Unknown'
+    };
+
+    const createResponse = await request(app)
+      .post('/authors')
+      .send(newAuthor);
+    
+    const authorId = createResponse.body.id; // Get the ID of the created author
+
+    // Delete the author
+    const deleteResponse = await request(app)
+      .delete(`/authors/${authorId}`);
+
+    expect(deleteResponse.status).toBe(204);
+    expect(deleteResponse.body).toEqual({}); // Ensure response body is empty
+
+    // Verify that the author was actually deleted
+    const getResponse = await request(app).get(`/authors/${authorId}`);
+    expect(getResponse.status).toBe(404);
+    expect(getResponse.text).toBe('Author not found');
+  });
+
+  it('should return 404 when deleting a non-existent author ID', async () => {
+    const response = await request(app)
+      .delete('/authors/999');
+    
+    expect(response.status).toBe(404);
+    expect(response.text).toBe('Author not found');
+  });
+
+  it('should return 404 for a non-existent author ID', async () => {
+    const response = await request(app).get('/authors/999');
+    expect(response.status).toBe(404);
+    expect(response.text).toBe('Author not found');
+  });
+
+  it('should return 404 when updating a non-existent author ID', async () => {
+    const updatedAuthor = {
+      name: 'Updated Name',
+      birthdate: '1980-01-01',
+      nationality: 'Updated Nationality'
+    };
+
+    const response = await request(app)
+      .put('/authors/999')
+      .send(updatedAuthor);
+
+    expect(response.status).toBe(404);
+    expect(response.text).toBe('Author not found');
+  });
+
+  it('should return 404 when partially updating a non-existent author ID', async () => {
+    const partialUpdate = {
+      name: 'Partially Updated Name'
+    };
+
+    const response = await request(app)
+      .patch('/authors/999')
+      .send(partialUpdate);
+
+    expect(response.status).toBe(404);
+    expect(response.text).toBe('Author not found');
+  });
 });
