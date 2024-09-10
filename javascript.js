@@ -27,8 +27,8 @@ describe('Car API', () => {
     expect(response.body.nationality).toBe(newcar.origin);
   });
 
-  it('should get an author by ID', async () => {
-    const authorId = 1;
+  it('should get an car by ID', async () => {
+    const carId = 1;
 
     const response = await request(app).get(`/cars/${carId}`);
     expect(response.status).toBe(200);
