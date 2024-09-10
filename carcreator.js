@@ -10,7 +10,7 @@ describe('Car API', () => {
   });
 
   it('should create a new car', async () => {
-    const newBook = {
+    const newCar = {
       Model: 'New Car',
       series: 2,
       origin: 'Germany',
@@ -19,7 +19,7 @@ describe('Car API', () => {
 
     const response = await request(app)
 	  .post('/cars')
-	  .send(newBook);
+	  .send(newCar);
 
     expect(response.status).toBe(201);
     expect(response.body).toHaveProperty('id');
@@ -31,7 +31,7 @@ describe('Car API', () => {
   });
 
   it('should get a book by ID', async () => {
-    const bookId = 1;
+    const carId = 1;
 
     const response = await request(app).get(`/cars/${carId}`);
     expect(response.status).toBe(200);
@@ -50,7 +50,7 @@ describe('Car API', () => {
 
     const response = await request(app)
 	  .put('/cars/1')
-	  .send(updatedBook);
+	  .send(updatedCar);
 
     expect(response.status).toBe(200);
     expect(response.body).toMatchObject(updatedCar);
@@ -67,7 +67,7 @@ describe('Car API', () => {
 
     expect(response.status).toBe(200);
     expect(response.body).toHaveProperty('id', 1);
-    expect(response.body.title).toBe(partialUpdate.title);
+    expect(response.body.series).toBe(partialUpdate.series);
   });
 
   it('should delete a car by ID', async () => {
@@ -81,7 +81,7 @@ describe('Car API', () => {
 
     const createResponse = await request(app)
 	  .post('/cars')
-	  .send(newBook);
+	  .send(newCar);
     
     const carId = createResponse.body.id; // Get the ID of the created car
 
@@ -100,7 +100,7 @@ describe('Car API', () => {
 
   it('should return 404 when deleting a non-existent car ID', async () => {
     const response = await request(app)
-	  .delete('/books/999');
+	  .delete('/cars/999');
     
     expect(response.status).toBe(404);
     expect(response.text).toBe('car not found');
@@ -126,7 +126,7 @@ describe('Car API', () => {
   });
   
   it('should filter cars by model', async () => {
-    const newBook = {
+    const newCar = {
       model: 'New car',
       series: 2,
       origin: 'Japan',
@@ -135,19 +135,18 @@ describe('Car API', () => {
 
     await request(app)
       .post('/cars')
-      .send(newBook);
+      .send(newCar);
 
     const transmission = 'Automatic';
 
-    const response = await request(app).get(`/cars?genre=${genre}`);
+    const response = await request(app).get(`/cars?model=${model}`);
     expect(response.status).toBe(200);
     expect(response.body).toBeInstanceOf(Array);
-    
     expect(response.body.length).toBeGreaterThanOrEqual(1);
 
-    const filteredBooks = response.body;
-    filteredBooks.forEach(book => {
-      expect(book.genre).toBe(genre);
+    const filteredCars = response.body;
+    filteredCars.forEach(car => {
+      expect(car.model).toBe(model);
     });
   });
 });
