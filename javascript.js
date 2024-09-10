@@ -22,32 +22,32 @@ describe('Car API', () => {
 
     expect(response.status).toBe(201);
     expect(response.body).toHaveProperty('id');
-    expect(response.body.name).toBe(newAuthor.name);
-    expect(response.body.birthdate).toBe(newAuthor.birthdate);
-    expect(response.body.nationality).toBe(newAuthor.nationality);
+    expect(response.body.name).toBe(newcar.model);
+    expect(response.body.birthdate).toBe(newcar.series);
+    expect(response.body.nationality).toBe(newcar.origin);
   });
 
   it('should get an author by ID', async () => {
     const authorId = 1;
 
-    const response = await request(app).get(`/authors/${authorId}`);
+    const response = await request(app).get(`/cars/${carId}`);
     expect(response.status).toBe(200);
-    expect(response.body).toHaveProperty('id', authorId);
-    expect(response.body).toHaveProperty('name');
-    expect(response.body).toHaveProperty('birthdate');
-    expect(response.body).toHaveProperty('nationality');
+    expect(response.body).toHaveProperty('id', carId);
+    expect(response.body).toHaveProperty('model');
+    expect(response.body).toHaveProperty('series');
+    expect(response.body).toHaveProperty('origin');
   });
 
-  it('should update an author by ID with the full object', async () => {
+  it('should update a car by ID with the full object', async () => {
     const updatedAuthor = {
       id: 1,
-      name: 'Updated Author Name',
-      birthdate: '1980-01-01',
-      nationality: 'Updated Nationality'
+      model: 'Updated Car Name',
+      series: '2',
+      origin: 'Updated Origin'
     };
 
     const response = await request(app)
-      .put(`/authors/${updatedAuthor.id}`)
+      .put(`/cars/${updatedCar.id}`)
       .send(updatedAuthor);
 
     expect(response.status).toBe(200);
@@ -60,7 +60,7 @@ describe('Car API', () => {
     };
 
     const response = await request(app)
-      .patch('/authors/1')
+      .patch('/cars/1')
       .send(partialUpdate);
 
     expect(response.status).toBe(200);
@@ -69,55 +69,55 @@ describe('Car API', () => {
   });
 
   it('should delete an author by ID', async () => {
-    // First, create an author to delete
-    const newAuthor = {
-      name: 'Author to Delete',
-      birthdate: '1980-01-01',
-      nationality: 'Unknown'
+    // First, create a car to delete
+    const newCar = {
+      model: 'Author to Delete',
+      series: '11',
+      origin: 'Unknown'
     };
 
     const createResponse = await request(app)
-      .post('/authors')
-      .send(newAuthor);
+      .post('/cars')
+      .send(newCar);
     
-    const authorId = createResponse.body.id; // Get the ID of the created author
+    const carmodel = createResponse.body.id; // Get the ID of the created author
 
     // Delete the author
     const deleteResponse = await request(app)
-      .delete(`/authors/${authorId}`);
+      .delete(`/car/${carmodel}`);
 
     expect(deleteResponse.status).toBe(204);
     expect(deleteResponse.body).toEqual({}); // Ensure response body is empty
 
     // Verify that the author was actually deleted
-    const getResponse = await request(app).get(`/authors/${authorId}`);
+    const getResponse = await request(app).get(`/car/${carmodel}`);
     expect(getResponse.status).toBe(404);
-    expect(getResponse.text).toBe('Author not found');
+    expect(getResponse.text).toBe('Car not found');
   });
 
-  it('should return 404 when deleting a non-existent author ID', async () => {
+  it('should return 404 when deleting a car ID that does not exist', async () => {
     const response = await request(app)
-      .delete('/authors/999');
+      .delete('/car/999');
     
     expect(response.status).toBe(404);
     expect(response.text).toBe('Author not found');
   });
 
-  it('should return 404 for a non-existent author ID', async () => {
+  it('should return 404 for a car ID that does not exist', async () => {
     const response = await request(app).get('/authors/999');
     expect(response.status).toBe(404);
     expect(response.text).toBe('Author not found');
   });
 
-  it('should return 404 when updating a non-existent author ID', async () => {
+  it('should return 404 when updating a car ID that does not exist', async () => {
     const updatedAuthor = {
-      name: 'Updated Name',
-      birthdate: '1980-01-01',
-      nationality: 'Updated Nationality'
+      Model: 'Updated Car',
+      series: '1',
+      origin: 'Updated Origin'
     };
 
     const response = await request(app)
-      .put('/authors/999')
+      .put('/car/999')
       .send(updatedAuthor);
 
     expect(response.status).toBe(404);
@@ -130,10 +130,10 @@ describe('Car API', () => {
     };
 
     const response = await request(app)
-      .patch('/authors/999')
+      .patch('/car/999')
       .send(partialUpdate);
 
     expect(response.status).toBe(404);
-    expect(response.text).toBe('Author not found');
+    expect(response.text).toBe('Car not found');
   });
 });

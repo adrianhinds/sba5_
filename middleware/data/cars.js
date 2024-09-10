@@ -11,4 +11,4 @@ const cars = [
     { id: 10, Model: "Nissan", carId: 10, modelId: 10, series: "7", transmission: "Manual" }
   ];
   
-  module.exports = books;
+  module.exports = cars;
