@@ -3,9 +3,9 @@ const bodyParser = require("body-parser");
 
 const logger = require("./middleware/log");
 const errorHandler = require("./utils/error");
-const authors = require("./routes/cars");
-const books = require("./routes/books");
-const publishers = require("./routes/publishers");
+const cars = require("./routes/cars");
+const carlocation = require("./routes/carlocation");
+const manufacturer = require("./routes/manufacturer");
 
 const app = express();
 
@@ -17,9 +17,9 @@ app.set("view engine", "pug");
 
 app.use(logger);
 
-app.use('/authors', authors);
-app.use('/books', books);
-app.use('/publishers', publishers);
+app.use('/cars', cars);
+app.use('/carlocation', carlocation);
+app.use('/manufacturer', manufacturer);
 
 app.use(errorHandler);
 
